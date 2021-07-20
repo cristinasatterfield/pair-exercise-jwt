@@ -88,9 +88,9 @@ const syncAndSeed = async () => {
     notes.map(note => Note.create(note))
   );
 
-  lucy.addNote(note1)
-  lucy.addNote(note2)
-  moe.addNote(note3)
+  await lucy.addNote(note1)
+  await lucy.addNote(note2)
+  await moe.addNote(note3)
   
 
 
