@@ -29,6 +29,7 @@ app.get('/api/auth', async (req, res, next) => {
     // const token = req.headers.authorization;
     // const userInfo = await jwt.verify(token, secret);
     // console.log(userInfo)
+    console.log("this is the authorization", req.headers.authorization)
     res.send(await User.byToken(req.headers.authorization));
   }
   catch (ex) {
