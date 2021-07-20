@@ -1,5 +1,7 @@
 const Sequelize = require('sequelize');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt')
+const SALT_COUNT = 5
 const secret = process.env.JWT;
 const { STRING } = Sequelize;
 const config = {
@@ -16,6 +18,10 @@ const User = conn.define('user', {
   password: STRING
 });
 
+const Note = conn.define('note', {
+  text: STRING
+})
+
 User.byToken = async (token) => {
   try {
     const payload = await jwt.verify(token, secret);
@@ -29,7 +35,6 @@ User.byToken = async (token) => {
       error.status = 401;
       throw error;
     }
-    
   } catch (ex) {
     const error = Error("bad credentials");
     error.status = 401;
@@ -38,13 +43,14 @@ User.byToken = async (token) => {
 };
 
 User.authenticate = async ({ username, password }) => {
+
   const user = await User.findOne({
     where: {
-      username,
-      password
+      username
     }
   });
-  if (user) {
+
+  if (user && await bcrypt.compare(password, user.password)){
     const token = await jwt.sign({ userId: user.id }, secret )
     return token
   }
@@ -52,6 +58,14 @@ User.authenticate = async ({ username, password }) => {
   error.status = 401;
   throw error;
 };
+
+User.beforeCreate( async (user)  => {
+
+  user.password = await bcrypt.hash(user.password, SALT_COUNT)
+})
+
+User.hasMany(Note)
+Note.belongsTo(User)
 
 const syncAndSeed = async () => {
   await conn.sync({ force: true });
@@ -63,6 +77,23 @@ const syncAndSeed = async () => {
   const [lucy, moe, larry] = await Promise.all(
     credentials.map(credential => User.create(credential))
   );
+
+  const notes = [
+    {text: "hello"},
+    {text: "world"},
+    {text: "hacker"}
+  ]
+
+  const [note1, note2, note3] = await Promise.all(
+    notes.map(note => Note.create(note))
+  );
+
+  lucy.addNote(note1)
+  lucy.addNote(note2)
+  moe.addNote(note3)
+  
+
+
   return {
     users: {
       lucy,
@@ -75,6 +106,7 @@ const syncAndSeed = async () => {
 module.exports = {
   syncAndSeed,
   models: {
-    User
+    User,
+    Note
   }
 };
