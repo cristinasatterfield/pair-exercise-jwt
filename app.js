@@ -28,20 +28,13 @@ app.get('/api/auth', async (req, res, next) => {
 
 app.get('/api/users/:id/notes', async (req, res, next) => {
   try {
-    const user = await User.byToken(req.headers.authorization)
-    console.log("this is user", user.id)
-    console.log(req.params.id)
-
-    if (user.id === req.params.id){
-      const notes = await Note.findAll({where: {userId: req.params.id}})
-      console.log("user checks out")
-      res.send(notes);
-
-    }else{
-      res.status(401).send("Incorrect login!")
-    }
-  }
-  catch (ex) {
+    const notes = await Note.findAll({
+      where: {
+        userId: req.params.id
+      }
+    });
+    res.send(notes);
+  } catch (ex) {
     next(ex);
   }
 });

@@ -30,7 +30,7 @@ User.byToken = async (token) => {
       if (user) {
         return user;
       }
-    }else{
+    } else {
       const error = Error("bad credentials");
       error.status = 401;
       throw error;
@@ -50,8 +50,8 @@ User.authenticate = async ({ username, password }) => {
     }
   });
 
-  if (user && await bcrypt.compare(password, user.password)){
-    const token = await jwt.sign({ userId: user.id }, secret )
+  if (user && await bcrypt.compare(password, user.password)) {
+    const token = await jwt.sign({ userId: user.id }, secret)
     return token
   }
   const error = Error('bad credentials');
@@ -59,11 +59,12 @@ User.authenticate = async ({ username, password }) => {
   throw error;
 };
 
-User.beforeCreate( async (user)  => {
+User.beforeCreate(async (user) => {
 
   user.password = await bcrypt.hash(user.password, SALT_COUNT)
 })
 
+// Associations
 User.hasMany(Note)
 Note.belongsTo(User)
 
@@ -79,9 +80,9 @@ const syncAndSeed = async () => {
   );
 
   const notes = [
-    {text: "hello"},
-    {text: "world"},
-    {text: "hacker"}
+    { text: "hello" },
+    { text: "world" },
+    { text: "hacker" }
   ]
 
   const [note1, note2, note3] = await Promise.all(
@@ -91,7 +92,7 @@ const syncAndSeed = async () => {
   await lucy.addNote(note1)
   await lucy.addNote(note2)
   await moe.addNote(note3)
-  
+
 
 
   return {

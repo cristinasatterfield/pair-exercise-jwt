@@ -64,15 +64,14 @@
       async attemptTokenLogin() {
         const token = window.localStorage.getItem('token');
         if (token) {
-          const response = await axios.get('/api/auth', {
+          const { data: auth } = await axios.get('/api/auth', {
             headers: {
               authorization: token
             }
           });
-          console.log(response)
-          const responseNotes = await axios.get(`/api/users/${response.data.id}/notes`, {headers: { authorization: token }})
-          console.log("RESPONSE NOTES!!!", responseNotes)
-          this.setState({ auth: response.data, notes: responseNotes });
+          const { id } = auth
+          const { data: notes } = await axios.get(`/api/users/${id}/notes`, { headers: { authorization: token } })
+          this.setState({ auth, notes });
         }
       }
       componentDidMount() {
@@ -86,8 +85,10 @@
       }
       render() {
         console.log("this is state", this.state)
-        const { auth } = this.state;
+        const { auth, notes } = this.state;
         const { signIn, logout } = this;
+        const formattedNotes = notes.data.map(note => <li key={note.id}>{note.text}</li>)
+
         if (!auth.id) {
           return <SignIn signIn={signIn} />
         }
@@ -97,9 +98,9 @@
               Welcome {auth.username}
               <button onClick={logout}>Logout</button>
               <ul>
-                {this.state.notes.data[0] ? this.state.notes.data.map( note => <li key={note.id}>{note.text}</li> ) : "no notes"}
+                {formattedNotes}
               </ul>
-    
+
             </div>
           );
         }
