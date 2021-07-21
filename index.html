@@ -87,7 +87,7 @@
         console.log("this is state", this.state)
         const { auth, notes } = this.state;
         const { signIn, logout } = this;
-        const formattedNotes = notes.data.map(note => <li key={note.id}>{note.text}</li>)
+        const formattedNotes = notes.map(note => <li key={note.id}>{note.text}</li>)
 
         if (!auth.id) {
           return <SignIn signIn={signIn} />
